@@ -217,3 +217,21 @@ func (oc *OtpClient) ValidateOtp(userId int, token string) error {
 
 	return nil
 }
+
+type GetRememberedClientResponse struct {
+	UserId    int `json:"user_id"`
+	ExpiresAt int `json:"expires_at"`
+}
+
+func (oc *OtpClient) GetRememberedClient(id string) (GetRememberedClientResponse, error) {
+	req := http_client.HttpRequest{
+		Url: oc.BaseUrl + fmt.Sprintf("/remembered-devices/%s", id),
+	}
+
+	resp, err := getRequest[GetRememberedClientResponse](oc, req)
+	if err != nil {
+		return GetRememberedClientResponse{}, err
+	}
+
+	return resp, nil
+}

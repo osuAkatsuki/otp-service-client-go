@@ -218,19 +218,19 @@ func (oc *OtpClient) ValidateOtp(userId int, token string) error {
 	return nil
 }
 
-type GetRememberedClientResponse struct {
+type GetRememberedDeviceResponse struct {
 	UserId    int `json:"user_id"`
 	ExpiresAt int `json:"expires_at"`
 }
 
-func (oc *OtpClient) GetRememberedClient(id string) (GetRememberedClientResponse, error) {
+func (oc *OtpClient) GetRememberedDevice(id string) (GetRememberedDeviceResponse, error) {
 	req := http_client.HttpRequest{
 		Url: oc.BaseUrl + fmt.Sprintf("/remembered-devices/%s", id),
 	}
 
-	resp, err := getRequest[GetRememberedClientResponse](oc, req)
+	resp, err := getRequest[GetRememberedDeviceResponse](oc, req)
 	if err != nil {
-		return GetRememberedClientResponse{}, err
+		return GetRememberedDeviceResponse{}, err
 	}
 
 	return resp, nil

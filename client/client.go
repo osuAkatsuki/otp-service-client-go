@@ -95,6 +95,18 @@ func postRequestWithBodyWithNoContent[T any](oc *OtpClient, request http_client.
 	return handleResponse(resp)
 }
 
+func postRequestWithBody[T any, T1 any](oc *OtpClient, request http_client.HttpRequestWithBody[T]) (T1, error) {
+	prepareRequest(oc, &request)
+
+	var def T1
+	resp, err := http_client.PostWithBody[T, T1](request)
+	if err != nil {
+		return def, err
+	}
+
+	return handleResponseWithBody[T1](resp)
+}
+
 func deleteRequestWithNoContent(oc *OtpClient, request http_client.HttpRequest) error {
 	prepareRequest(oc, &request)
 
@@ -219,8 +231,8 @@ func (oc *OtpClient) ValidateOtp(userId int, token string) error {
 }
 
 type GetRememberedDeviceResponse struct {
-	UserId    int `json:"user_id"`
-	ExpiresAt int `json:"expires_at"`
+	UserId    int   `json:"user_id"`
+	ExpiresAt int64 `json:"expires_at"`
 }
 
 func (oc *OtpClient) GetRememberedDevice(id string) (GetRememberedDeviceResponse, error) {
@@ -231,6 +243,33 @@ func (oc *OtpClient) GetRememberedDevice(id string) (GetRememberedDeviceResponse
 	resp, err := getRequest[GetRememberedDeviceResponse](oc, req)
 	if err != nil {
 		return GetRememberedDeviceResponse{}, err
+	}
+
+	return resp, nil
+}
+
+type CreateRememberedDeviceRequest struct {
+	UserId int `json:"user_id"`
+}
+
+type CreateRememberedDeviceResponse struct {
+	Id        string `json:"id"`
+	ExpiresAt int64  `json:"expires_at"`
+}
+
+func (oc *OtpClient) CreateRememberedDevice(userId int) (CreateRememberedDeviceResponse, error) {
+	req := http_client.HttpRequestWithBody[CreateRememberedDeviceRequest]{
+		HttpRequest: http_client.HttpRequest{
+			Url: oc.BaseUrl + "/remembered-devices",
+		},
+		Body: CreateRememberedDeviceRequest{
+			UserId: userId,
+		},
+	}
+
+	resp, err := postRequestWithBody[CreateRememberedDeviceRequest, CreateRememberedDeviceResponse](oc, req)
+	if err != nil {
+		return CreateRememberedDeviceResponse{}, nil
 	}
 
 	return resp, nil
